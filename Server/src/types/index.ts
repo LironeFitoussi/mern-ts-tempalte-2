@@ -1,2 +1,2 @@
-export type * from "./users.d.ts";
-export type * from "./express.d.ts";
+export type * from "./usersTypes";
+export type * from "./expressTypes";

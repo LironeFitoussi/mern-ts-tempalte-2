@@ -16,9 +16,7 @@ export interface IUserDoc extends IUser, Document {
     updatedAt: Date;
 }
 
-// Extend the Model interface to include custom static methods
-declare module "mongoose" {
-    interface Model<IUserDoc> {
-        findByAuth0Id(auth0Id: string): Promise<IUserDoc | null>;
-    }
+// Interface for static methods
+export interface IUserModel extends Model<IUserDoc> {
+    findByAuth0Id(auth0Id: string): Promise<IUserDoc | null>;
 }

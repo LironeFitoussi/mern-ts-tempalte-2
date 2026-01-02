@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import User from "../models/user.model";
+import User from "../models/userModel";
 import { AppError } from "@/utils/errorHandler";
 
 class AuthController {

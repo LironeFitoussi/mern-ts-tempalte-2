@@ -4,6 +4,7 @@ import { fetchUser } from '../redux/slices/userSlice';
 import { useAuth0 } from '@auth0/auth0-react';
 import type { Auth0User } from '@/types';
 import api from '@/services/api';
+import { LoadingSpinner } from '@/components/Atoms';
 
 interface AppInitializerProps {
   children: React.ReactNode;
@@ -12,13 +13,12 @@ interface AppInitializerProps {
 const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
   const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector((state) => state.user);
-  const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
-  // const { user: userState } = useAppSelector((state) => state.user);
+  const { isAuthenticated, user, getAccessTokenSilently, isLoading: auth0Loading } = useAuth0();
 
   useEffect(() => {
     const initializeApp = async () => {
-      if (isAuthenticated && user) {
-        
+      // Only initialize if Auth0 has finished loading and user is authenticated
+      if (!auth0Loading && isAuthenticated && user) {
         // Set API headers with token
         try {
           const token = await getAccessTokenSilently({
@@ -29,7 +29,6 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
           });
           
           const bearerToken = `Bearer ${token}`;
-          // console.log(bearerToken);
           api.defaults.headers.common['Authorization'] = bearerToken;
           
           // Fetch user data
@@ -44,33 +43,43 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
     };
 
     initializeApp();
-  }, [dispatch, isAuthenticated, user, getAccessTokenSilently]);
+  }, [dispatch, isAuthenticated, user, getAccessTokenSilently, auth0Loading]);
 
-  // Show loading state while fetching user
-  if (loading) {
+  // Show loading state while Auth0 is initializing
+  if (auth0Loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading user...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <LoadingSpinner size="lg" text="Initializing authentication..." />
+      </div>
+    );
+  }
+
+  // Show loading state while fetching user (only if authenticated)
+  if (isAuthenticated && loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <LoadingSpinner size="lg" text="Loading user data..." />
       </div>
     );
   }
 
   // Show error state if user fetch failed
-  if (error) {
+  if (error && isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md">
           <div className="text-red-500 text-6xl mb-4">⚠️</div>
           <h2 className="text-xl font-semibold text-gray-800 mb-2">Failed to load user</h2>
           <p className="text-gray-600 mb-4">{error}</p>
           <button
-            onClick={() => dispatch(fetchUser({
-              userData: user as Auth0User,
-            }))}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            onClick={() => {
+              if (user) {
+                dispatch(fetchUser({
+                  userData: user as Auth0User,
+                }));
+              }
+            }}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
           >
             Retry
           </button>
@@ -79,7 +88,7 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
     );
   }
 
-  // Render children when user is loaded or no error
+  // Render children when authentication state is determined and user is loaded (if authenticated)
   return <>{children}</>;
 };
 

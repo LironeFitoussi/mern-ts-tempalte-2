@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import User from "../models/user.model";
-import { createUserSchema, updateUserSchema } from "../zod/users.zod.js";
+import User from "../models/userModel";
+import { createUserSchema, updateUserSchema } from "../zod/usersZod.js";
 import { AppError } from "../utils/errorHandler.js";
 
 class UsersController {

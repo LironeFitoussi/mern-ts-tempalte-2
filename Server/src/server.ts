@@ -10,8 +10,8 @@ import connectDB from "./config/db.js";
 import { errorHandler } from "./utils/errorHandler.js";
 
 // Routes
-import userRoutes from "./routes/user.routes.js";
-import authRoutes from "./routes/auth.routes.js";
+import userRoutes from "./routes/userRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import dangerRoutes from "./routes/dangerRoutes.js";
 
 // Config Middleware

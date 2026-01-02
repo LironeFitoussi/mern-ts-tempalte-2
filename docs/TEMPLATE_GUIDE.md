@@ -13,6 +13,13 @@ This guide will help you quickly set up this template for your new application.
 - [ ] Update page titles in HTML files
 
 ### 2. Configure Environment Variables
+
+**Option A: Automated Setup (Recommended)**
+- [ ] Run `npm run boot` from the project root
+- [ ] This automatically creates `.env` files from `.env.example` templates
+- [ ] Edit `Server/.env` and `Client/.env` with your actual values
+
+**Option B: Manual Setup**
 - [ ] Copy `.env.example` to `.env` in both Client and Server directories
 - [ ] Set up Auth0 account and get credentials
 - [ ] Update MongoDB connection string
@@ -69,7 +76,7 @@ Server/src/
 
 #### 1. Backend (API)
 
-**Create Model** (`Server/src/models/yourModel.model.ts`):
+**Create Model** (`Server/src/models/yourModelModel.ts`):
 ```typescript
 import mongoose, { Schema } from "mongoose";
 import type { IYourModelDoc } from "../types";
@@ -84,7 +91,7 @@ const yourModelSchema = new Schema<IYourModelDoc>({
 export default mongoose.model<IYourModelDoc>("YourModel", yourModelSchema);
 ```
 
-**Create Zod Schema** (`Server/src/zod/yourModel.zod.ts`):
+**Create Zod Schema** (`Server/src/zod/yourModelZod.ts`):
 ```typescript
 import { z } from "zod";
 
@@ -96,11 +103,11 @@ export const createYourModelSchema = z.object({
 export const updateYourModelSchema = createYourModelSchema.partial();
 ```
 
-**Create Controller** (`Server/src/controllers/yourModel.controllers.ts`):
+**Create Controller** (`Server/src/controllers/yourModelControllers.ts`):
 ```typescript
 import type { Request, Response } from "express";
-import YourModel from "../models/yourModel.model";
-import { createYourModelSchema } from "../zod/yourModel.zod";
+import YourModel from "../models/yourModelModel";
+import { createYourModelSchema } from "../zod/yourModelZod";
 import { AppError } from "../utils/errorHandler";
 
 class YourModelController {
@@ -121,12 +128,12 @@ class YourModelController {
 export default YourModelController;
 ```
 
-**Create Route** (`Server/src/routes/yourModel.routes.ts`):
+**Create Route** (`Server/src/routes/yourModelRoutes.ts`):
 ```typescript
 import { Router } from "express";
-import YourModelController from "../controllers/yourModel.controllers";
+import YourModelController from "../controllers/yourModelControllers";
 import { asyncHandler } from "../utils/errorHandler";
-import { auth0Middleware } from "../middleware/auth0.mdw";
+import { auth0Middleware } from "../middleware/auth0Mdw";
 
 const router = Router();
 const controller = new YourModelController();
@@ -139,7 +146,7 @@ export default router;
 
 **Register Route** (`Server/src/server.ts`):
 ```typescript
-import yourModelRoutes from "./routes/yourModel.routes.js";
+import yourModelRoutes from "./routes/yourModelRoutes.js";
 // ...
 app.use("/api/your-model", yourModelRoutes);
 ```
@@ -250,14 +257,15 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 
 ### Customizing the Design System
 
-The template uses a glassy iOS-inspired design. To customize:
+The template uses a clean modern design with a blue theme. To customize:
 
-1. **Colors**: Update Tailwind classes in components
-2. **Glass Effect**: Modify `bg-white/20 backdrop-blur-xl` values
-3. **Borders**: Adjust `rounded-3xl`, `rounded-2xl` classes
+1. **Colors**: Update CSS variables in `Client/src/index.css` for theme colors
+2. **Components**: Modify Tailwind classes in atomic design components
+3. **Borders**: Adjust `rounded-xl`, `rounded-lg` classes
 4. **Animations**: Update Framer Motion props
+5. **Typography**: Change font family in `index.css` (currently using Figtree)
 
-See `Client/DESIGN_SYSTEM.md` for complete guidelines.
+See [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) for complete guidelines.
 
 ## 🔐 Auth0 Setup Details
 
@@ -299,7 +307,7 @@ Allowed Web Origins:
 **Environment Variables for Production:**
 ```env
 NODE_ENV=production
-PORT=5000
+PORT=3000
 MONGO_URI=your-production-mongodb-uri
 CLIENT_URL=https://your-frontend-url.com
 AUTH0_DOMAIN=your-auth0-domain.auth0.com
@@ -376,10 +384,10 @@ After deployment, add your production URLs to Auth0 Application settings!
 ### Backend Issues
 ```bash
 # Check if server is running
-curl http://localhost:5000/health
+curl http://localhost:3000/health
 
 # Check database connection
-curl http://localhost:5000/danger/db-health
+curl http://localhost:3000/danger/db-health
 
 # Check logs
 npm run dev  # Watch console output
@@ -405,7 +413,7 @@ console.log(import.meta.env)
 
 ## 📚 Additional Resources
 
-- [DESIGN_SYSTEM.md](Client/DESIGN_SYSTEM.md) - Complete design guidelines
+- [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) - Complete design guidelines
 - [README.md](README.md) - Main documentation
 - [Auth0 React SDK](https://github.com/auth0/auth0-react)
 - [TanStack Query](https://tanstack.com/query/latest)

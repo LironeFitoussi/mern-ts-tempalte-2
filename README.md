@@ -1,6 +1,6 @@
 # 🚀 MERN Stack Template with Auth0
 
-A modern, production-ready MERN (MongoDB, Express, React, Node.js) stack template with Auth0 authentication and a beautiful iOS-inspired glassy design system.
+A modern, production-ready MERN (MongoDB, Express, React, Node.js) stack template with Auth0 authentication and a clean modern design system.
 
 ## ✨ Features
 
@@ -12,11 +12,12 @@ A modern, production-ready MERN (MongoDB, Express, React, Node.js) stack templat
 - **Role-Based Access**: User roles system (admin, user)
 
 ### 🎨 Design System
-- **iOS 26 Inspired**: Modern glassy design with glass morphism effects
+- **Modern Design**: Clean, simple design with blue theme
 - **Tailwind CSS**: Utility-first CSS framework
 - **Radix UI**: Accessible, unstyled UI components
 - **Framer Motion**: Smooth animations and transitions
 - **Responsive**: Mobile-first responsive design
+- **Atomic Design**: Organized component structure (Atoms, Molecules, Organisms)
 - **Design Documentation**: Comprehensive design system guide included
 
 ### 🛠️ Tech Stack
@@ -57,8 +58,8 @@ A modern, production-ready MERN (MongoDB, Express, React, Node.js) stack templat
 
 ### 1. Clone the Repository
 ```bash
-git clone <your-repo-url>
-cd media-hub-light
+git clone https://github.com/LironeFitoussi/mern-ts-tempalte-2.git
+cd mern-ts-tempalte-2
 ```
 
 ### 2. Setup Auth0
@@ -71,69 +72,143 @@ cd media-hub-light
    - Client ID (from Application)
    - Audience (API Identifier from API settings)
 
-### 3. Server Setup
+### 3. Automated Setup (Recommended)
 
+Run the boot command from the project root to automatically:
+- Create `.env` files from `.env.example` templates
+- Install all dependencies for both Server and Client
+
+```bash
+npm run boot
+```
+
+After the boot process completes, edit the `.env` files with your actual values:
+- `Server/.env` - Add your MongoDB URI and Auth0 credentials
+- `Client/.env` - Add your Auth0 credentials
+
+### 4. Manual Setup (Alternative)
+
+If you prefer manual setup:
+
+#### Server Setup
 ```bash
 cd Server
 npm install
 ```
 
-Create a `.env` file in the Server directory:
-```env
-# Server Configuration
-PORT=5000
-NODE_ENV=development
-
-# Database
-MONGO_URI=mongodb://localhost:27017/your-app-name
-
-# Client URL (for CORS)
-CLIENT_URL=http://localhost:5173
-
-# Auth0 Configuration
-AUTH0_DOMAIN=your-auth0-domain.auth0.com
-AUTH0_AUDIENCE=https://your-api-identifier
-```
-
-Start the server:
+Copy `.env.example` to `.env` and fill in your values:
 ```bash
-npm run dev
+cp .env.example .env
 ```
 
-### 4. Client Setup
-
+#### Client Setup
 ```bash
 cd Client
 npm install
 ```
 
-Create a `.env` file in the Client directory:
-```env
-# API Configuration
-VITE_API_URL=http://localhost:5000/api
-
-# Auth0 Configuration
-VITE_AUTH0_DOMAIN=your-auth0-domain.auth0.com
-VITE_AUTH0_CLIENT_ID=your-auth0-client-id
-VITE_AUTH0_AUDIENCE=https://your-api-identifier
+Copy `.env.example` to `.env` and fill in your values:
+```bash
+cp .env.example .env
 ```
 
-Start the client:
+### 5. Start Development Servers
+
+**Server:**
 ```bash
+cd Server
 npm run dev
 ```
 
-### 5. Configure Auth0 Callbacks
+**Client:**
+```bash
+cd Client
+npm run dev
+```
+
+### 6. Configure Auth0 Callbacks
 
 In your Auth0 Application settings, add:
 - **Allowed Callback URLs**: `http://localhost:5173`
 - **Allowed Logout URLs**: `http://localhost:5173`
 - **Allowed Web Origins**: `http://localhost:5173`
 
+## 🐳 Docker Setup (Recommended)
+
+This project includes a complete Docker setup with hot reload for development and production-ready configurations.
+
+### Prerequisites
+- Docker Desktop (or Docker Engine + Docker Compose)
+- `.env` file at project root (see `.env.example`)
+
+### Quick Start with Docker
+
+1. **Create `.env` file** (REQUIRED):
+   ```bash
+   cp .env.example .env
+   ```
+   
+   **Important**: Edit `.env` and fill in your Auth0 credentials:
+   - `AUTH0_DOMAIN` - Your Auth0 domain (e.g., `your-tenant.auth0.com`)
+   - `AUTH0_AUDIENCE` - Your API identifier (e.g., `https://your-api`)
+   - `AUTH0_CLIENT_ID` - Your Auth0 application client ID
+   - `AUTH0_CLIENT_SECRET` - Your Auth0 machine-to-machine client secret
+   - `VITE_AUTH0_DOMAIN` - Same as AUTH0_DOMAIN
+   - `VITE_AUTH0_CLIENT_ID` - Same as AUTH0_CLIENT_ID
+   - `VITE_AUTH0_AUDIENCE` - Same as AUTH0_AUDIENCE
+   
+   Without these, the server will fail to start!
+
+   **Note**: If you see "MongoDB Authentication failed" error, reset MongoDB:
+   ```bash
+   npm run reset:mongodb
+   npm run dev
+   ```
+
+2. **Start development** (shows live logs from all containers):
+   ```bash
+   npm run dev
+   ```
+   
+   Or run in detached mode (background):
+   ```bash
+   npm run dev:detached
+   ```
+
+3. **Start production**:
+   ```bash
+   npm run start
+   ```
+
+4. **Stop services**:
+   ```bash
+   npm run stop
+   ```
+
+5. **View logs**:
+   ```bash
+   npm run logs
+   ```
+
+### Access Services
+- Client: http://localhost:5173
+- Server: http://localhost:3000
+- MongoDB: localhost:27017
+
+📖 **See [DOCKER.md](./docs/DOCKER.md) for detailed Docker documentation**
+
+### Docker Features
+- ✅ Hot reload in development (code changes reflect immediately)
+- ✅ Reverse proxy for API requests (no CORS issues)
+- ✅ Isolated Docker networks
+- ✅ Persistent data volumes
+- ✅ Health checks for all services
+- ✅ Production-ready multi-stage builds
+
 ## 📁 Project Structure
 
 ```
-media-hub-light/
+mern-ts-tempalte-2/
 ├── Client/                  # React frontend
 │   ├── src/
 │   │   ├── components/      # React components
@@ -149,7 +224,8 @@ media-hub-light/
 │   │   ├── services/       # API services
 │   │   ├── types/          # TypeScript types
 │   │   └── main.tsx        # Entry point
-│   ├── DESIGN_SYSTEM.md    # Design system documentation
+│   └── docs/               # Documentation files
+│   ├── .env.example        # Environment variables template
 │   └── package.json
 │
 ├── Server/                  # Express backend
@@ -163,12 +239,26 @@ media-hub-light/
 │   │   ├── utils/          # Utility functions
 │   │   ├── zod/            # Zod validation schemas
 │   │   └── server.ts       # Entry point
+│   ├── .env.example        # Environment variables template
 │   └── package.json
 │
+├── scripts/                 # Root-level automation scripts
+│   ├── boot.js             # Automated setup script
+│   └── build.js            # Build script for both projects
+├── package.json            # Root package.json with convenience scripts
 └── README.md               # This file
 ```
 
 ## 🎯 Available Scripts
+
+### Root Level (Project Root)
+- `npm run boot` - **Automated setup**: Creates `.env` files from templates and installs all dependencies
+- `npm run build` - Build both Server and Client for production (runs in parallel)
+- `npm run install:all` - Install dependencies for both Server and Client
+- `npm run dev` - Start Docker development environment
+- `npm run start` - Start Docker production environment
+- `npm run stop` - Stop Docker services
+- `npm run logs` - View Docker logs
 
 ### Server
 - `npm run dev` - Start development server with hot reload
@@ -207,15 +297,16 @@ Comprehensive error handling system:
 
 ## 🎨 Design System
 
-The template includes a comprehensive design system inspired by iOS 26:
+The template includes a comprehensive modern design system:
 
-- **Glass Morphism**: Beautiful transparent backgrounds with blur effects
-- **Consistent Colors**: Predefined color palette
-- **Typography**: Clear hierarchy and readability
+- **Clean Design**: Simple, modern interface with blue theme
+- **Consistent Colors**: Predefined color palette with light and dark blue variants
+- **Typography**: Clear hierarchy using Figtree font
 - **Animations**: Smooth transitions with Framer Motion
-- **Components**: Ready-to-use UI components
+- **Components**: Ready-to-use UI components following atomic design principles
+- **Loading States**: Unified loading spinner component
 
-See `Client/DESIGN_SYSTEM.md` for complete design guidelines.
+See [docs/DESIGN_SYSTEM.md](./docs/DESIGN_SYSTEM.md) for complete design guidelines.
 
 ## 🔧 Customization Guide
 
@@ -225,7 +316,7 @@ See `Client/DESIGN_SYSTEM.md` for complete design guidelines.
 - Add your logo
 
 ### 2. Extend User Model
-Edit `Server/src/models/user.model.ts`:
+Edit `Server/src/models/userModel.ts`:
 ```typescript
 const userSchema = new Schema<IUserDoc>({
   // Add your custom fields
@@ -303,8 +394,9 @@ Follow the atomic design structure:
 - [Radix UI](https://www.radix-ui.com)
 
 ### Design Resources
-- [iOS Design Guidelines](https://developer.apple.com/design/human-interface-guidelines/)
-- [Glass Morphism](https://uxdesign.cc/glassmorphism-in-user-interfaces-1f39bb1308c9)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [Radix UI Components](https://www.radix-ui.com)
+- [Atomic Design Methodology](https://bradfrost.com/blog/post/atomic-web-design/)
 
 ## 🤝 Contributing
 
