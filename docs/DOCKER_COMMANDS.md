@@ -2,199 +2,159 @@
 
 Quick reference guide for all Docker-related npm scripts.
 
-## 🚀 Development Mode
+## Starting & Stopping
 
-### Start Services
 ```bash
-# Start in detached mode (background)
-npm run docker:dev
+# Start dev environment with live sync (docker compose watch)
+npm run dev
 
-# Start with build (rebuild images)
-npm run docker:dev:build
+# Start dev environment in background
+npm run dev:detached
 
-# Start in foreground (see logs)
-npm run docker:dev:up
+# Stop all containers
+npm run stop
+
+# Stop containers and delete all volumes (clean slate)
+npm run reset
+
+# Full rebuild: stop, remove volumes, rebuild images, and start
+npm run docker:rebuild
 ```
 
-### View Logs
-```bash
-# All services
-npm run docker:dev:logs
+## Viewing Logs
 
-# Specific service
-npm run docker:dev:logs:server
-npm run docker:dev:logs:client
-npm run docker:dev:logs:mongodb
-```
-
-### Manage Services
-```bash
-# Stop services (keeps containers)
-npm run docker:dev:stop
-
-# Restart services
-npm run docker:dev:restart
-
-# Stop and remove containers
-npm run docker:dev:down
-
-# Stop, remove containers and volumes (clean slate)
-npm run docker:dev:clean
-
-# Full rebuild (clean + rebuild + start)
-npm run docker:dev:rebuild
-```
-
-### Debug & Inspect
-```bash
-# View running containers
-npm run docker:dev:ps
-
-# View resource usage
-npm run docker:dev:stats
-
-# Access shell in containers
-npm run docker:dev:shell:server
-npm run docker:dev:shell:client
-npm run docker:dev:shell:mongodb
-```
-
-## 🏭 Production Mode
-
-### Start Services
-```bash
-# Start in detached mode with build
-npm run docker:prod
-
-# Start in foreground (see logs)
-npm run docker:prod:up
-```
-
-### View Logs
 ```bash
 # All services
-npm run docker:prod:logs
+npm run logs
 
-# Specific service
-npm run docker:prod:logs:server
-npm run docker:prod:logs:client
-npm run docker:prod:logs:mongodb
+# Server only
+npm run docker:logs:server
+
+# Client only
+npm run docker:logs:client
 ```
 
-### Manage Services
-```bash
-# Stop services (keeps containers)
-npm run docker:prod:stop
+## Inspection & Debugging
 
-# Restart services
-npm run docker:prod:restart
-
-# Stop and remove containers
-npm run docker:prod:down
-
-# Stop, remove containers and volumes
-npm run docker:prod:clean
-
-# Full rebuild (clean + rebuild + start)
-npm run docker:prod:rebuild
-```
-
-### Inspect
 ```bash
 # View running containers
-npm run docker:prod:ps
+npm run docker:ps
+
+# View resource usage (CPU, memory)
+npm run docker:stats
+
+# Access server container shell
+npm run docker:shell:server
+
+# Access client container shell
+npm run docker:shell:client
 ```
 
-## 🧹 Cleanup
+## All Scripts Reference
 
-```bash
-# Clean all (dev + prod)
-npm run docker:clean:all
-```
+| Script | Command | Description |
+|--------|---------|-------------|
+| `npm run dev` | `docker compose watch` | Start with live sync (file changes auto-sync) |
+| `npm run dev:detached` | `docker compose up -d --build` | Start in background |
+| `npm run stop` | `docker compose down` | Stop all containers |
+| `npm run logs` | `docker compose logs -f` | Tail logs from all services |
+| `npm run reset` | `docker compose down -v` | Stop and delete volumes |
+| `npm run docker:ps` | `docker compose ps` | Show container status |
+| `npm run docker:stats` | `docker compose stats --no-stream` | Show resource usage |
+| `npm run docker:rebuild` | `down -v && up -d --build` | Clean rebuild from scratch |
+| `npm run docker:shell:server` | `docker compose exec server sh` | Shell into server container |
+| `npm run docker:shell:client` | `docker compose exec client sh` | Shell into client container |
+| `npm run docker:logs:server` | `docker compose logs -f server` | Tail server logs |
+| `npm run docker:logs:client` | `docker compose logs -f client` | Tail client logs |
 
-## 📋 Common Workflows
+## Common Workflows
 
 ### First Time Setup
 ```bash
-# 1. Create .env file from .env.example
-cp .env.example .env
+# 1. Run boot script (configures Docker names, ports, copies .env files)
+npm run boot
 
-# 2. Edit .env with your configuration
+# 2. Edit Server/.env and Client/.env with your credentials
 
 # 3. Start development environment
-npm run docker:dev:build
+npm run dev
 ```
 
 ### Daily Development
 ```bash
-# Start services
-npm run docker:dev
+# Start services with live sync
+npm run dev
 
-# View logs
-npm run docker:dev:logs
+# View logs in another terminal
+npm run logs
 
 # Stop when done
-npm run docker:dev:down
+npm run stop
 ```
 
-### After Code Changes
+### After Dependency Changes
 ```bash
-# If you changed dependencies, rebuild
-npm run docker:dev:rebuild
-
-# If just code changes, restart is enough
-npm run docker:dev:restart
+# If you changed package.json, rebuild from scratch
+npm run docker:rebuild
 ```
 
-### Deploy to Production
+### Debugging Issues
 ```bash
-# Build and start production
-npm run docker:prod
+# Check container status
+npm run docker:ps
 
-# Monitor logs
-npm run docker:prod:logs
+# Check logs for errors
+npm run docker:logs:server
+npm run docker:logs:client
+
+# Access container shell to inspect
+npm run docker:shell:server
 ```
 
-## 🔍 Troubleshooting
+## Troubleshooting
 
-### Services won't start
+### Services Won't Start
 ```bash
-# Check logs
-npm run docker:dev:logs
+# Check logs for errors
+npm run logs
 
-# Clean and rebuild
-npm run docker:dev:rebuild
+# Clean rebuild
+npm run docker:rebuild
 ```
 
-### Port conflicts
+### Port Conflicts
 ```bash
 # Check what's using the port
 # Windows: netstat -ano | findstr :3000
 # Linux/Mac: lsof -i :3000
 
-# Change port in .env file
-SERVER_PORT=3001
+# Change ports in Server/.env and Client/.env, then rebuild
+npm run docker:rebuild
 ```
 
-### Database connection issues
+### Database Connection Issues
+MongoDB runs on Atlas (not in Docker). To diagnose:
 ```bash
-# Check MongoDB logs
-npm run docker:dev:logs:mongodb
+# Check server logs for connection errors
+npm run docker:logs:server
 
-# Access MongoDB shell
-npm run docker:dev:shell:mongodb
+# Hit the database health endpoint
+curl http://localhost:3000/danger/db-health
+
+# Verify MONGO_URI in Server/.env is correct
+# Check MongoDB Atlas IP whitelist includes your IP
 ```
 
-### View container status
-```bash
-npm run docker:dev:ps
-```
+### Hot Reload Not Working
+- Ensure you started with `npm run dev` (not `npm run dev:detached`)
+- `npm run dev` uses `docker compose watch` which syncs file changes automatically
+- Only changes in `src/` directories trigger sync; `package.json` changes trigger a full rebuild
+- Check logs for errors: `npm run docker:logs:server` or `npm run docker:logs:client`
 
-## 📝 Notes
+## Notes
 
-- **Development mode**: Uses bind mounts for hot reload
-- **Production mode**: Uses built images, no hot reload
-- **Volumes**: Data persists between container restarts
-- **Networks**: Services communicate via Docker network
-- **Environment**: Variables loaded from `.env` file
-
+- **Development mode** uses `docker compose watch` with sync actions for instant file updates
+- **MongoDB** is external (Atlas) — not a Docker service
+- **Node modules** are stored in named Docker volumes (not bind-mounted from host)
+- **Network**: Services communicate via the `mern-network` bridge network
+- **Client** proxies `/api/*` requests to `http://server:3000` via Vite config inside Docker

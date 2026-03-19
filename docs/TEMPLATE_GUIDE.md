@@ -216,42 +216,37 @@ export default function YourModelPage() {
 }
 ```
 
-**Add Route** (`Client/src/routes.tsx`):
+**Add Route** (`Client/src/config/routesConfig.tsx`):
 ```typescript
-import YourModelPage from "./pages/YourModelPage";
+import YourModelPage from "@/pages/YourModelPage";
+import { Box } from "lucide-react";
 
-export const routes = [
-  {
-    path: "/",
-    Component: Layout,
-    children: [
-      // ... existing routes
-      {
-        path: "/your-model",
-        Component: YourModelPage,
-        name: "Your Model",
-      },
-    ],
-  },
-];
+// Add to the routeConfig array:
+{
+  path: "/your-model",
+  name: "Your Model",
+  Component: YourModelPage,
+  icon: Box,
+  showInSidebar: true,
+  requireAuth: true,
+  requiredRole: undefined,
+}
 ```
 
 ### Adding Protected Routes
 
-Wrap your component with `ProtectedRoute`:
+Use the `requiredRole` field in the route config — `ProtectedRoute` handles the rest automatically:
 
 ```typescript
-import ProtectedRoute from "@/components/ProtectedRoute";
-
-// In routes.tsx
+// In Client/src/config/routesConfig.tsx
 {
   path: "/admin",
-  Component: () => (
-    <ProtectedRoute requiredRole="admin">
-      <AdminPage />
-    </ProtectedRoute>
-  ),
   name: "Admin",
+  Component: AdminPage,
+  icon: Shield,
+  showInSidebar: true,
+  requireAuth: true,
+  requiredRole: "admin",  // Only users with "admin" role can access
 }
 ```
 

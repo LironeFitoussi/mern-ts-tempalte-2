@@ -1,73 +1,60 @@
 # Docker Setup Guide
 
-This project includes a comprehensive Docker setup with development and production configurations.
+This project includes a Docker setup for development using `docker compose watch` for live file syncing.
 
-## 🏗️ Architecture
+## Architecture
 
-- **Client**: React + Vite frontend (port 5173 in dev, 80 in prod)
+- **Client**: React + Vite frontend (port 5173)
 - **Server**: Node.js + Express backend (port 3000)
-- **Database**: MongoDB (port 27017)
+- **Database**: MongoDB Atlas (external — not a Docker service)
 
-## 📁 Docker Files
+## Docker Files
 
-- `docker-compose.yml` - Development configuration with hot reload
-- `docker-compose.prod.yml` - Production configuration
-- `Client/Dockerfile` - Multi-stage Dockerfile for frontend
-- `Server/Dockerfile` - Multi-stage Dockerfile for backend
-- `.dockerignore` - Files to exclude from Docker builds
+- `docker-compose.yml` — Root compose file, uses `include:` to merge Server and Client compose files
+- `Server/compose.yml` — Server service definition
+- `Client/compose.yml` — Client service definition
+- `Server/Dockerfile` — Multi-stage Dockerfile (development, build, production stages)
+- `Client/Dockerfile` — Multi-stage Dockerfile (development, build, production stages)
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
-- Docker Desktop (or Docker Engine + Docker Compose)
-- `.env` file with required environment variables (see `.env.example`)
+- Docker Desktop (or Docker Engine + Docker Compose V2)
+- MongoDB Atlas connection string
 
 ### Development Mode
 
-1. **Create `.env` file** from `.env.example`:
+1. **Run the boot script** (first time only):
    ```bash
-   cp .env.example .env
+   npm run boot
    ```
+   This prompts for Docker container names, ports, and creates `.env` files from `.env.example`.
 
-2. **Update environment variables** in `.env`:
-   - Set MongoDB credentials
+2. **Edit environment variables** in `Server/.env` and `Client/.env`:
+   - Set `MONGO_URI` to your MongoDB Atlas connection string
    - Configure Auth0 credentials
-   - Set API URLs
 
-3. **Start all services**:
+3. **Start all services with live sync**:
    ```bash
-   docker-compose up -d
+   npm run dev
    ```
 
 4. **View logs**:
    ```bash
    # All services
-   docker-compose logs -f
+   npm run logs
 
    # Specific service
-   docker-compose logs -f server
-   docker-compose logs -f client
-   docker-compose logs -f mongodb
+   npm run docker:logs:server
+   npm run docker:logs:client
    ```
 
 5. **Access services**:
    - Client: http://localhost:5173 (API requests are proxied automatically)
-   - Server: http://localhost:3000 (direct access, or via proxy from client)
-   - MongoDB: localhost:27017
-
-### Production Mode
-
-1. **Build and start production containers**:
-   ```bash
-   docker-compose -f docker-compose.prod.yml up -d --build
-   ```
-
-2. **Access services**:
-   - Client: http://localhost:80 (or configured port)
    - Server: http://localhost:3000
 
-## 🔄 Reverse Proxy (Vite)
+## Reverse Proxy (Vite)
 
 The frontend uses **Vite's built-in reverse proxy** to forward API requests to the backend:
 
@@ -84,188 +71,134 @@ The frontend uses **Vite's built-in reverse proxy** to forward API requests to t
 
 ### Configuration:
 
-- **In Docker**: Proxy target is `http://server:3000` (uses Docker service name)
+- **In Docker**: Proxy target is `http://server:3000` (uses Docker service name via `mern-network`)
 - **Locally**: Proxy target is `http://localhost:3000`
 - **Custom**: Set `VITE_PROXY_TARGET` environment variable
 
 The API service (`Client/src/services/api.ts`) automatically uses relative URLs in development to leverage the proxy, and full URLs in production.
 
-## 🔥 Hot Reload (Development)
+## Hot Reload (Development)
 
-The development setup uses **bind mounts** to enable hot reload:
+The development setup uses **`docker compose watch`** for live file syncing:
 
-- **Client**: Changes to `Client/src/` are immediately reflected
-- **Server**: Changes to `Server/src/` trigger automatic TypeScript recompilation
+- **`sync` action**: Changes to `src/` directories are instantly synced into the container (no rebuild)
+- **`rebuild` action**: Changes to `package.json` or `package-lock.json` trigger a full container rebuild
 
 ### How it works:
 
-1. Source code is mounted as bind volumes
-2. `node_modules` are stored in named volumes (better performance)
-3. Vite uses polling for file watching in Docker
-4. Server uses `tsx --watch` for hot reload
+1. `npm run dev` runs `docker compose watch`
+2. File changes in `src/` are detected and synced into the running container
+3. `node_modules` are stored in named Docker volumes (not synced from host)
+4. Server uses `tsx --watch` for TypeScript recompilation
+5. Client uses Vite's built-in HMR
 
-## 📦 Volumes
+## Volumes
 
-### Named Volumes (Persistent Data)
+### Named Volumes
 
-- `mongodb_data` - MongoDB database files (dev)
-- `mongodb_data_prod` - MongoDB database files (prod)
-- `server_node_modules` - Server dependencies (dev)
-- `client_node_modules` - Client dependencies (dev)
+- `server_node_modules` — Server dependencies
+- `client_node_modules` — Client dependencies
 
-### Bind Mounts (Development Only)
+These volumes keep `node_modules` inside Docker for better performance and avoid conflicts with host OS.
 
-- Source code directories for hot reload
-- Configuration files
+## Networks
 
-## 🌐 Networks
+- `mern-network` — Bridge network for inter-service communication
 
-- `mern-network` - Development network (bridge driver)
-- `mern-network-prod` - Production network (bridge driver)
+The client container reaches the server via Docker DNS at `http://server:3000`.
 
-Services communicate through these isolated networks.
+## Common Commands
 
-## 🛠️ Common Commands
+See [DOCKER_COMMANDS.md](./DOCKER_COMMANDS.md) for the full reference. Key commands:
 
-### Start services
 ```bash
-docker-compose up -d
-```
-
-### Stop services
-```bash
-docker-compose down
-```
-
-### Stop and remove volumes
-```bash
-docker-compose down -v
-```
-
-### Rebuild containers
-```bash
-docker-compose build --no-cache
-docker-compose up -d
-```
-
-### View running containers
-```bash
-docker-compose ps
+npm run dev              # Start with live sync
+npm run dev:detached     # Start in background
+npm run stop             # Stop containers
+npm run reset            # Stop + delete volumes
+npm run docker:rebuild   # Clean rebuild from scratch
+npm run docker:ps        # View container status
+npm run logs             # Tail all logs
 ```
 
 ### Execute commands in containers
 ```bash
-# Server shell
-docker-compose exec server sh
-
-# Client shell
-docker-compose exec client sh
-
-# MongoDB shell
-docker-compose exec mongodb mongosh -u admin -p password
+npm run docker:shell:server   # Server shell
+npm run docker:shell:client   # Client shell
 ```
 
-### View resource usage
+## Health Checks
+
+- **Server**: `GET /health` endpoint returns `{ success: true, message: "Server is healthy" }`
+- **Database**: `GET /danger/db-health` endpoint (dev only) checks MongoDB Atlas connectivity
+
+View container health status:
 ```bash
-docker stats
+npm run docker:ps
 ```
 
-## 🔍 Health Checks
-
-All services include health checks:
-
-- **MongoDB**: Checks database connectivity
-- **Server**: Checks `/health` endpoint
-- **Client**: Nginx health endpoint
-
-View health status:
-```bash
-docker-compose ps
-```
-
-## 🔒 Security Best Practices
+## Security Best Practices
 
 ### Development
-- MongoDB exposed on localhost (for development tools)
-- Source code bind mounted (for hot reload)
+- Source code synced via `docker compose watch`
+- MongoDB credentials stored in `Server/.env` (not committed to git)
 
 ### Production
-- MongoDB not exposed externally (internal network only)
+- Use multi-stage Dockerfile `production` target
 - Non-root user in server container
 - Resource limits configured
-- Security headers in Nginx
+- Security headers in Nginx (client production stage)
 - Environment variables for sensitive data
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Port already in use
 ```bash
-# Change ports in .env file or docker-compose.yml
-SERVER_PORT=3001
-CLIENT_PORT=5174
+# Change ports in Server/.env and Client/.env, then rebuild
+npm run docker:rebuild
 ```
 
 ### Container won't start
 ```bash
-# Check logs
-docker-compose logs [service-name]
+# Check logs for errors
+npm run logs
 
-# Rebuild without cache
-docker-compose build --no-cache
+# Clean rebuild
+npm run docker:rebuild
 ```
 
 ### Hot reload not working
-- Ensure bind mounts are correctly configured
-- Check file permissions
-- Verify Vite polling is enabled (already configured)
+- Ensure you started with `npm run dev` (uses `docker compose watch`)
+- `npm run dev:detached` does NOT enable live sync — use `npm run dev` instead
+- Only `src/` changes are synced; other file changes trigger rebuild
+- Check logs: `npm run docker:logs:server` or `npm run docker:logs:client`
 
-### MongoDB connection issues
-- Verify `MONGO_URI` in `.env`
-- Check MongoDB container is healthy: `docker-compose ps`
-- Wait for MongoDB to fully start (health check)
+### MongoDB Atlas connection issues
+- Verify `MONGO_URI` in `Server/.env`
+- Check MongoDB Atlas IP whitelist includes your current IP
+- Hit `GET /danger/db-health` to check connectivity
+- Check server logs: `npm run docker:logs:server`
 
 ### Node modules issues
 ```bash
-# Remove node_modules volumes and rebuild
-docker-compose down -v
-docker-compose up -d --build
+# Remove volumes and rebuild
+npm run docker:rebuild
 ```
 
-## 📝 Environment Variables
+## Environment Variables
 
-### Development Variables
+Environment variables are split between `Server/.env` and `Client/.env`. See the main [CLAUDE.md](../CLAUDE.md) for the full list.
 
-- `MONGO_ROOT_USERNAME` - MongoDB root username
-- `MONGO_ROOT_PASSWORD` - MongoDB root password
-- `MONGO_DATABASE` - MongoDB database name
-- `MONGO_PORT` - MongoDB exposed port (default: 27017)
-- `SERVER_PORT` - Backend server port (default: 3000)
-- `CLIENT_PORT` - Frontend dev server port (default: 5173)
-- `CLIENT_URL` - Frontend URL for CORS (default: http://localhost:5173)
-- `VITE_API_URL` - API URL (optional in dev, uses proxy if empty)
-- `VITE_PROXY_TARGET` - Custom proxy target (default: auto-detected)
-- `VITE_AUTH0_DOMAIN` - Auth0 domain
-- `VITE_AUTH0_CLIENT_ID` - Auth0 client ID
-- `VITE_AUTH0_AUDIENCE` - Auth0 API audience
-- `AUTH0_DOMAIN` - Auth0 domain (server)
-- `AUTH0_AUDIENCE` - Auth0 API audience (server)
-- `AUTH0_CLIENT_ID` - Auth0 client ID (server)
-- `AUTH0_CLIENT_SECRET` - Auth0 client secret (server)
+Key Docker-relevant variables:
+- `PORT` — Express server port (default: 3000)
+- `MONGO_URI` — MongoDB Atlas connection string
+- `CLIENT_URL` — Frontend URL for CORS
+- `VITE_PROXY_TARGET` — Custom proxy target (default: auto-detected)
 
-**Note**: In development, `VITE_API_URL` can be left empty to use the reverse proxy. The proxy will automatically forward `/api/*` requests to the backend.
+**Note**: In development, `VITE_API_URL` can be left empty to use the reverse proxy.
 
-## 🚢 Production Deployment
-
-1. Set `NODE_ENV=production` in environment
-2. Use `docker-compose.prod.yml`
-3. Configure proper domain names in `CLIENT_URL`
-4. Use secrets management for sensitive data
-5. Enable HTTPS (use reverse proxy like Traefik or Nginx)
-6. Set up proper backup strategy for MongoDB volumes
-
-## 📚 Additional Resources
+## Additional Resources
 
 - [Docker Compose Documentation](https://docs.docker.com/compose/)
-- [Docker Best Practices](https://docs.docker.com/develop/dev-best-practices/)
+- [Docker Compose Watch](https://docs.docker.com/compose/how-tos/file-watch/)
 - [Multi-stage Builds](https://docs.docker.com/build/building/multi-stage/)
-
