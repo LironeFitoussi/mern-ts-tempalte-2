@@ -14,6 +14,13 @@
 | `npm run install:all` | Install deps in Server/ and Client/ |
 | `npm run test` | Run Vitest in Server and Client |
 | `npm run lint` | Run ESLint in Server and Client |
+| `npm run docker:ps` | Show running container status |
+| `npm run docker:stats` | Show container CPU/memory usage |
+| `npm run docker:rebuild` | Clean rebuild: stop, remove volumes, rebuild, start |
+| `npm run docker:shell:server` | Open shell in server container |
+| `npm run docker:shell:client` | Open shell in client container |
+| `npm run docker:logs:server` | Tail server logs only |
+| `npm run docker:logs:client` | Tail client logs only |
 
 ### Server scripts (run from Server/)
 - `npm run dev` — `tsx --watch src/server.ts`
