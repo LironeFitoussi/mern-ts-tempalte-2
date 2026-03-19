@@ -1,62 +1,44 @@
-# 🚀 MERN Stack Template with Auth0
+# MERN Stack Template with Auth0
 
-A modern, production-ready MERN (MongoDB, Express, React, Node.js) stack template with Auth0 authentication and a clean modern design system.
+A production-ready MERN (MongoDB, Express 5, React 19, Node.js) stack template with Auth0 authentication, Docker Compose development workflow, and atomic design system.
 
-## ✨ Features
+## Features
 
-### 🔐 Authentication
-- **Auth0 Integration**: Complete JWT-based authentication system
-- **Auto User Creation**: Automatic user creation on first login
-- **Protected Routes**: Ready-to-use protected route components
-- **Token Management**: Automatic token refresh and validation
-- **Role-Based Access**: User roles system (admin, user)
+### Authentication
+- **Auth0 Integration** — JWT-based authentication via `express-oauth2-jwt-bearer`
+- **Auto User Creation** — Users are created in MongoDB on first login
+- **Protected Routes** — Route-level auth with role-based access (`admin`, `user`)
+- **Token Management** — Silent token refresh, automatic `Authorization` header injection
 
-### 🎨 Design System
-- **Modern Design**: Clean, simple design with blue theme
-- **Tailwind CSS**: Utility-first CSS framework
-- **Radix UI**: Accessible, unstyled UI components
-- **Framer Motion**: Smooth animations and transitions
-- **Responsive**: Mobile-first responsive design
-- **Atomic Design**: Organized component structure (Atoms, Molecules, Organisms)
-- **Design Documentation**: Comprehensive design system guide included
+### Tech Stack
 
-### 🛠️ Tech Stack
+| Layer | Technologies |
+|-------|-------------|
+| **Frontend** | React 19, Vite 7, TypeScript, React Router v7, Redux Toolkit, TanStack Query, Axios, Framer Motion, Tailwind CSS v4, Radix UI |
+| **Backend** | Node.js, Express 5, TypeScript, Mongoose, Zod 4, express-oauth2-jwt-bearer |
+| **Infrastructure** | Docker Compose with `watch` (live sync), multi-stage Dockerfiles, NGINX production builds |
+| **Testing** | Vitest 4, React Testing Library, jsdom |
+| **Tooling** | ESLint 9, tsc-alias, Claude Code hooks (auto-lint, auto-test) |
 
-#### Frontend
-- **React 19** with TypeScript
-- **Vite**: Lightning-fast development server
-- **React Router v7**: Modern routing solution
-- **Redux Toolkit**: State management
-- **TanStack Query**: Server state management
-- **Axios**: HTTP client
-- **React Hot Toast**: Beautiful notifications
+### Design System
+- **Tailwind CSS v4** with `class-variance-authority` and `tailwind-merge`
+- **Radix UI** primitives (Avatar, Checkbox, Dropdown Menu)
+- **Framer Motion** animations
+- **Atomic Design** structure: Atoms, Molecules, Organisms
+- **Lucide React** and **React Icons** for iconography
 
-#### Backend
-- **Node.js** with Express 5
-- **TypeScript**: Type-safe backend code
-- **MongoDB**: NoSQL database with Mongoose ODM
-- **Zod**: Runtime type validation
-- **Express Rate Limit**: API rate limiting
-- **Morgan**: HTTP request logger
-- **CORS**: Cross-origin resource sharing
+See [docs/DESIGN_SYSTEM.md](./docs/DESIGN_SYSTEM.md) for full guidelines.
 
-### 🔒 Security Features
-- JWT token validation with Auth0
-- Rate limiting (10,000 requests per 15 minutes)
-- CORS configuration
-- Environment variable validation
-- Comprehensive error handling
+## Prerequisites
 
-## 📋 Prerequisites
+- Node.js v18+
+- Docker Desktop (for Docker workflow) or MongoDB (local/Atlas)
+- Auth0 account ([auth0.com](https://auth0.com))
 
-- Node.js (v18 or higher)
-- MongoDB (local or Atlas)
-- Auth0 account (free tier available)
-- npm or yarn package manager
+## Quick Start
 
-## 🚀 Quick Start
+### 1. Clone
 
-### 1. Clone the Repository
 ```bash
 git clone https://github.com/LironeFitoussi/mern-ts-tempalte-2.git
 cd mern-ts-tempalte-2
@@ -64,363 +46,341 @@ cd mern-ts-tempalte-2
 
 ### 2. Setup Auth0
 
-1. Create a free Auth0 account at [auth0.com](https://auth0.com)
-2. Create a new **Application** (Single Page Application)
-3. Create a new **API** in Auth0 dashboard
-4. Note down:
-   - Domain
-   - Client ID (from Application)
-   - Audience (API Identifier from API settings)
+1. Create an **Application** (Single Page Application) in Auth0 dashboard
+2. Create an **API** (the audience/identifier)
+3. In Application settings, add:
+   - **Allowed Callback URLs**: `http://localhost:5173`
+   - **Allowed Logout URLs**: `http://localhost:5173`
+   - **Allowed Web Origins**: `http://localhost:5173`
+4. Note your **Domain**, **Client ID**, and **API Audience**
 
-### 3. Automated Setup (Recommended)
-
-Run the boot command from the project root to automatically:
-- Create `.env` files from `.env.example` templates
-- Install all dependencies for both Server and Client
+### 3. Boot the Project
 
 ```bash
 npm run boot
 ```
 
-After the boot process completes, edit the `.env` files with your actual values:
-- `Server/.env` - Add your MongoDB URI and Auth0 credentials
-- `Client/.env` - Add your Auth0 credentials
+This interactive script will:
+- Prompt for Docker container names, image names, ports, and network name
+- Copy `.env.example` to `.env` in both `Server/` and `Client/`
+- Install dependencies for both projects
 
-### 4. Manual Setup (Alternative)
+Then edit the generated `.env` files with your credentials:
 
-If you prefer manual setup:
-
-#### Server Setup
-```bash
-cd Server
-npm install
+**Server/.env**
+```
+PORT=3000
+NODE_ENV=development
+MONGO_URI=mongodb://localhost:27017/your-app-name
+CLIENT_URL=http://localhost:5173
+AUTH0_DOMAIN=your-tenant.auth0.com
+AUTH0_AUDIENCE=https://your-api-identifier
 ```
 
-Copy `.env.example` to `.env` and fill in your values:
-```bash
-cp .env.example .env
+**Client/.env**
+```
+VITE_API_URL=http://localhost:3000/api
+VITE_AUTH0_DOMAIN=your-tenant.auth0.com
+VITE_AUTH0_CLIENT_ID=your-auth0-client-id
+VITE_AUTH0_AUDIENCE=https://your-api-identifier
 ```
 
-#### Client Setup
-```bash
-cd Client
-npm install
-```
+### 4. Start Development
 
-Copy `.env.example` to `.env` and fill in your values:
+**With Docker (recommended):**
 ```bash
-cp .env.example .env
-```
-
-### 5. Start Development Servers
-
-**Server:**
-```bash
-cd Server
 npm run dev
 ```
+Uses `docker compose watch` for live file syncing — code changes reflect immediately without rebuilds.
 
-**Client:**
+**Without Docker:**
 ```bash
-cd Client
-npm run dev
+# Terminal 1
+cd Server && npm run dev
+
+# Terminal 2
+cd Client && npm run dev
 ```
 
-### 6. Configure Auth0 Callbacks
+### Access Points
+- **Client**: http://localhost:5173
+- **Server**: http://localhost:3000
+- **API Proxy**: The Vite dev server proxies `/api` requests to the server (no CORS issues in development)
 
-In your Auth0 Application settings, add:
-- **Allowed Callback URLs**: `http://localhost:5173`
-- **Allowed Logout URLs**: `http://localhost:5173`
-- **Allowed Web Origins**: `http://localhost:5173`
+## Docker
 
-## 🐳 Docker Setup (Recommended)
+The project uses a split Compose architecture:
 
-This project includes a complete Docker setup with hot reload for development and production-ready configurations.
+```
+docker-compose.yml          # Root — includes Server and Client compose files
+├── Server/compose.yml      # Server service definition
+└── Client/compose.yml      # Client service definition
+```
 
-### Prerequisites
-- Docker Desktop (or Docker Engine + Docker Compose)
-- `.env` file at project root (see `.env.example`)
+Both services use `docker compose watch`:
+- **sync** action for `src/` changes (instant, no rebuild)
+- **rebuild** action for `package.json` / `package-lock.json` changes
 
-### Quick Start with Docker
+Dockerfiles are multi-stage: `development` (tsx/vite dev server) → `build` (TypeScript compile) → `production` (node/nginx). Named volumes for `node_modules`. Shared `mern-network` bridge network.
 
-1. **Create `.env` file** (REQUIRED):
-   ```bash
-   cp .env.example .env
-   ```
-   
-   **Important**: Edit `.env` and fill in your Auth0 credentials:
-   - `AUTH0_DOMAIN` - Your Auth0 domain (e.g., `your-tenant.auth0.com`)
-   - `AUTH0_AUDIENCE` - Your API identifier (e.g., `https://your-api`)
-   - `AUTH0_CLIENT_ID` - Your Auth0 application client ID
-   - `AUTH0_CLIENT_SECRET` - Your Auth0 machine-to-machine client secret
-   - `VITE_AUTH0_DOMAIN` - Same as AUTH0_DOMAIN
-   - `VITE_AUTH0_CLIENT_ID` - Same as AUTH0_CLIENT_ID
-   - `VITE_AUTH0_AUDIENCE` - Same as AUTH0_AUDIENCE
-   
-   Without these, the server will fail to start!
+MongoDB is external (Atlas or local) — not containerized.
 
-   **Note**: If you see "MongoDB Authentication failed" error, reset MongoDB:
-   ```bash
-   npm run reset:mongodb
-   npm run dev
-   ```
+See [docs/DOCKER.md](./docs/DOCKER.md) for detailed Docker documentation.
 
-2. **Start development** (shows live logs from all containers):
-   ```bash
-   npm run dev
-   ```
-   
-   Or run in detached mode (background):
-   ```bash
-   npm run dev:detached
-   ```
-
-3. **Start production**:
-   ```bash
-   npm run start
-   ```
-
-4. **Stop services**:
-   ```bash
-   npm run stop
-   ```
-
-5. **View logs**:
-   ```bash
-   npm run logs
-   ```
-
-### Access Services
-- Client: http://localhost:5173
-- Server: http://localhost:3000
-- MongoDB: localhost:27017
-
-📖 **See [DOCKER.md](./docs/DOCKER.md) for detailed Docker documentation**
-
-### Docker Features
-- ✅ Hot reload in development (code changes reflect immediately)
-- ✅ Reverse proxy for API requests (no CORS issues)
-- ✅ Isolated Docker networks
-- ✅ Persistent data volumes
-- ✅ Health checks for all services
-- ✅ Production-ready multi-stage builds
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 mern-ts-tempalte-2/
-├── Client/                  # React frontend
+├── Client/                     # React 19 frontend
 │   ├── src/
-│   │   ├── components/      # React components
-│   │   │   ├── ui/         # Base UI components (shadcn)
-│   │   │   ├── Atoms/      # Atomic design components
-│   │   │   ├── Molecules/  # Molecular components
-│   │   │   ├── Organism/   # Organism components
+│   │   ├── components/
+│   │   │   ├── ui/            # shadcn/Radix base components
+│   │   │   ├── Atoms/         # Badge, Card, Heading, etc.
+│   │   │   ├── Molecules/     # FeatureCard, Hero, MenuItem, etc.
+│   │   │   ├── Organism/      # Footer, Sidebar
 │   │   │   ├── AppInitializer.tsx
 │   │   │   └── ProtectedRoute.tsx
-│   │   ├── hooks/          # Custom React hooks
-│   │   ├── pages/          # Page components
-│   │   ├── redux/          # Redux store and slices
-│   │   ├── services/       # API services
-│   │   ├── types/          # TypeScript types
-│   │   └── main.tsx        # Entry point
-│   └── docs/               # Documentation files
-│   ├── .env.example        # Environment variables template
-│   └── package.json
+│   │   ├── config/            # Route configuration
+│   │   ├── hooks/             # Custom React hooks
+│   │   ├── pages/             # Page components
+│   │   ├── redux/             # Redux store and slices
+│   │   ├── services/          # Axios API services
+│   │   ├── test/              # Test setup
+│   │   ├── types/             # TypeScript types
+│   │   └── main.tsx           # Entry point
+│   ├── Dockerfile             # Multi-stage (dev/build/prod with NGINX)
+│   ├── compose.yml            # Docker Compose service definition
+│   └── .env.example
 │
-├── Server/                  # Express backend
+├── Server/                     # Express 5 backend
 │   ├── src/
-│   │   ├── config/         # Configuration files
-│   │   ├── controllers/    # Route controllers
-│   │   ├── middleware/     # Express middleware
-│   │   ├── models/         # Mongoose models
-│   │   ├── routes/         # API routes
-│   │   ├── types/          # TypeScript types
-│   │   ├── utils/          # Utility functions
-│   │   ├── zod/            # Zod validation schemas
-│   │   └── server.ts       # Entry point
-│   ├── .env.example        # Environment variables template
-│   └── package.json
+│   │   ├── config/            # Database connection, env config
+│   │   ├── controllers/       # Route controllers
+│   │   ├── middleware/        # Auth0 JWT middleware
+│   │   ├── models/            # Mongoose models
+│   │   ├── routes/            # Express routes
+│   │   ├── types/             # TypeScript types
+│   │   ├── utils/             # AppError, asyncHandler, errorHandler
+│   │   ├── zod/               # Zod validation schemas
+│   │   └── server.ts          # Entry point
+│   ├── Dockerfile             # Multi-stage (dev/build/prod)
+│   ├── compose.yml            # Docker Compose service definition
+│   └── .env.example
 │
-├── scripts/                 # Root-level automation scripts
-│   ├── boot.js             # Automated setup script
-│   └── build.js            # Build script for both projects
-├── package.json            # Root package.json with convenience scripts
-└── README.md               # This file
+├── scripts/
+│   ├── boot.js                # Interactive setup script
+│   ├── build.js               # Parallel build for Server + Client
+│   ├── check-docker.js        # Docker availability checker
+│   └── hooks/
+│       ├── lint.js            # Post-edit ESLint hook
+│       └── test.js            # Post-edit Vitest hook (test files)
+│
+├── docs/                       # Documentation
+│   ├── TEMPLATE_GUIDE.md      # Comprehensive usage guide
+│   ├── DESIGN_SYSTEM.md       # Design system guidelines
+│   ├── DOCKER.md              # Docker setup guide
+│   └── ...
+│
+├── docker-compose.yml          # Root compose (includes Server + Client)
+├── .mcp.json                   # MCP server configuration for Claude Code
+├── .claude/settings.json       # Claude Code hooks configuration
+└── package.json                # Root scripts
 ```
 
-## 🎯 Available Scripts
+## Available Scripts
 
-### Root Level (Project Root)
-- `npm run boot` - **Automated setup**: Creates `.env` files from templates and installs all dependencies
-- `npm run build` - Build both Server and Client for production (runs in parallel)
-- `npm run install:all` - Install dependencies for both Server and Client
-- `npm run dev` - Start Docker development environment
-- `npm run start` - Start Docker production environment
-- `npm run stop` - Stop Docker services
-- `npm run logs` - View Docker logs
+### Root Level
 
-### Server
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build for production
-- `npm start` - Start production server
+| Script | Description |
+|--------|-------------|
+| `npm run boot` | Interactive setup: Docker config, .env files, dependency install |
+| `npm run dev` | Start Docker dev environment with `docker compose watch` |
+| `npm run dev:detached` | Start Docker dev environment in background |
+| `npm run stop` | Stop all Docker containers |
+| `npm run reset` | Stop containers and delete all volumes |
+| `npm run logs` | Tail logs from all containers |
+| `npm run build` | Build Server and Client in parallel |
+| `npm run install:all` | Install dependencies for both projects |
+| `npm run test` | Run Vitest in Server and Client |
+| `npm run lint` | Run ESLint in Server and Client |
+| `npm run docker:ps` | Show running container status |
+| `npm run docker:stats` | Show container CPU/memory usage |
+| `npm run docker:rebuild` | Clean rebuild: stop, remove volumes, rebuild, start |
+| `npm run docker:shell:server` | Open shell in server container |
+| `npm run docker:shell:client` | Open shell in client container |
+| `npm run docker:logs:server` | Tail server logs only |
+| `npm run docker:logs:client` | Tail client logs only |
 
-### Client
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
+### Server (`cd Server`)
 
-## 🔑 Key Components
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Start with `tsx --watch` (hot reload) |
+| `npm run build` | `tsc -b && tsc-alias` |
+| `npm start` | Run production build |
+| `npm run test` | `vitest run` |
+| `npm run test:watch` | `vitest` (watch mode) |
+| `npm run lint` | `eslint .` |
 
-### AppInitializer
-Handles automatic user initialization:
-- Fetches Auth0 token on login
-- Sets API authorization headers
-- Creates user in database if not exists
-- Manages user state in Redux
+### Client (`cd Client`)
 
-### ProtectedRoute
-Wrapper component for protected pages:
-```tsx
-<ProtectedRoute requiredRole="admin">
-  <YourComponent />
-</ProtectedRoute>
-```
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Vite dev server |
+| `npm run build` | `tsc -b && vite build` |
+| `npm run preview` | Preview production build |
+| `npm run test` | `vitest run` |
+| `npm run test:watch` | `vitest` (watch mode) |
+| `npm run lint` | `eslint .` |
+
+## API Endpoints
+
+### Public
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/health` | Server health check |
+| `POST` | `/api/users` | Create user |
+| `GET` | `/api/users` | List all users |
+| `GET` | `/api/users/:id` | Get user by ID |
+| `PATCH` | `/api/users/:id` | Update user |
+| `DELETE` | `/api/users/:id` | Delete user |
+
+### Protected (Auth0 JWT required)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/auth/me` | Get current user by Auth0 sub |
+| `GET` | `/api/auth/validate` | Validate JWT token |
+
+### Development Only
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/danger/db-health` | Database connection status |
+
+## Client Routes
+
+| Path | Auth Required | Description |
+|------|:---:|-------------|
+| `/` | No | Home page |
+| `/profile` | Yes | View profile |
+| `/profile/settings` | Yes | Profile settings |
+| `/profile/preferences` | Yes | User preferences |
+| `/dashboard` | Yes | Dashboard overview |
+| `/dashboard/analytics` | Yes | Analytics |
+| `/dashboard/reports` | Yes | Reports |
+| `/settings` | Yes | General settings |
+| `/settings/security` | Yes | Security settings |
+| `/settings/notifications` | Yes | Notification preferences |
+
+Routes are configured in `Client/src/config/routesConfig.tsx` with sidebar visibility, auth requirements, and role filtering.
+
+## Key Architecture Decisions
+
+### Auth Flow
+1. Auth0 authenticates user → `getAccessTokenSilently()` returns JWT
+2. JWT set on Axios defaults: `Authorization: Bearer {token}`
+3. `fetchUser` thunk calls `GET /api/auth/me`
+4. If 404 → auto-creates user via `POST /api/users` → re-fetches
+
+### Middleware Stack (Server)
+CORS → Rate Limit (10k/15min) → Morgan → connectDB → JSON parser → URL encoded → Routes → Error Handler
 
 ### Error Handling
-Comprehensive error handling system:
-- Mongoose errors (validation, cast, duplicate key)
-- Zod validation errors
-- Custom AppError class
-- Development-friendly error messages
+`AppError` class with `asyncHandler` wrapper. Mongoose and Zod errors auto-transform to `AppError` with proper HTTP status codes.
 
-## 🎨 Design System
+### Path Aliases
+Both Server and Client use `@/*` → `src/*`. Server resolves via `tsc-alias` at build time. Client resolves via Vite config.
 
-The template includes a comprehensive modern design system:
+## Testing
 
-- **Clean Design**: Simple, modern interface with blue theme
-- **Consistent Colors**: Predefined color palette with light and dark blue variants
-- **Typography**: Clear hierarchy using Figtree font
-- **Animations**: Smooth transitions with Framer Motion
-- **Components**: Ready-to-use UI components following atomic design principles
-- **Loading States**: Unified loading spinner component
+- **Framework**: Vitest 4
+- **Server**: Node environment, `@/` path alias
+- **Client**: jsdom environment, React Testing Library, setup file at `src/test/setup.ts`
+- **Pattern**: `src/**/*.test.ts` (Server), `src/**/*.test.{ts,tsx}` (Client)
 
-See [docs/DESIGN_SYSTEM.md](./docs/DESIGN_SYSTEM.md) for complete design guidelines.
+```bash
+# Run all tests
+npm run test
 
-## 🔧 Customization Guide
-
-### 1. Update Branding
-- Replace "YourApp" in `Header.tsx` and `Footer.tsx`
-- Update page titles and meta tags
-- Add your logo
-
-### 2. Extend User Model
-Edit `Server/src/models/userModel.ts`:
-```typescript
-const userSchema = new Schema<IUserDoc>({
-  // Add your custom fields
-  customField: { type: String, required: false },
-});
+# Watch mode (from Server/ or Client/)
+npm run test:watch
 ```
 
-### 3. Add New Routes
+## Claude Code Integration
 
-#### Backend
-1. Create controller in `Server/src/controllers/`
-2. Create route in `Server/src/routes/`
-3. Add Zod validation in `Server/src/zod/`
-4. Register route in `Server/src/server.ts`
+This project is configured for use with [Claude Code](https://claude.com/claude-code).
 
-#### Frontend
-1. Create page component in `Client/src/pages/`
-2. Add route in `Client/src/routes.tsx`
-3. Create API service in `Client/src/services/`
+### MCP Servers (`.mcp.json`)
 
-### 4. Add New UI Components
-Follow the atomic design structure:
-- **Atoms**: Basic building blocks (buttons, inputs)
-- **Molecules**: Simple combinations of atoms
-- **Organisms**: Complex components (header, forms)
+| Server | Purpose |
+|--------|---------|
+| `playwright` | Browser automation and UI testing |
+| `context7` | Up-to-date library documentation by version |
+| `mongodb` | Direct MongoDB queries and schema inspection |
+| `github` | Repo management, PRs, issues |
+| `auth0` | Auth0 tenant management |
+| `eslint` | Linting through Claude Code |
 
-## 🚦 API Endpoints
+**Required shell environment variables** (not in `.env` files):
+- `MONGO_URI` — MongoDB connection string
+- `GITHUB_TOKEN` — GitHub Personal Access Token with repo scope
 
-### Authentication
-- `GET /api/auth/me` - Get current user (protected)
-- `GET /api/auth/validate` - Validate JWT token (protected)
+### Hooks (`.claude/settings.json`)
 
-### Users
-- `GET /api/users` - Get all users
-- `GET /api/users/:id` - Get user by ID
-- `POST /api/users` - Create new user
-- `PATCH /api/users/:id` - Update user
-- `DELETE /api/users/:id` - Delete user
+| Trigger | Action |
+|---------|--------|
+| After `Write`/`Edit` on any file | ESLint auto-runs on the changed file |
+| After `Write`/`Edit` on `*.test.*` files | Vitest auto-runs in the relevant directory |
 
-### Health Check
-- `GET /health` - Server health check
-- `GET /danger/db-health` - Database health (dev only)
+### Slash Commands
 
-## 🐛 Troubleshooting
+Claude Code skills are available for common operations: `/add-crud`, `/add-model`, `/add-page`, `/add-route`, `/add-component`, `/add-middleware`, `/add-service`, `/add-redux-slice`, `/add-test`, `/new-feature`, `/add-docker-service`, `/review`, `/debug`, `/push`, and more. Run `/help` in Claude Code for the full list.
 
-### Common Issues
+## Customization
 
-**Auth0 Login Redirect Not Working**
-- Check callback URLs in Auth0 dashboard
-- Verify environment variables are correct
-- Ensure Auth0 domain doesn't have `https://` prefix
+### Add a New API Endpoint
+1. Controller in `Server/src/controllers/`
+2. Zod schema in `Server/src/zod/`
+3. Route in `Server/src/routes/` (wrap with `asyncHandler`, add `auth0Middleware` if protected)
+4. Register in `Server/src/server.ts`: `app.use("/api/thing", thingRoutes)`
 
-**CORS Errors**
-- Check `CLIENT_URL` in server `.env`
-- Verify CORS configuration in `server.ts`
+### Add a New Page
+1. Page component in `Client/src/pages/`
+2. Add to `routeConfig` in `Client/src/config/routesConfig.tsx`
+3. API service in `Client/src/services/` if needed
 
-**Database Connection Failed**
-- Check MongoDB is running
-- Verify `MONGO_URI` in server `.env`
-- Check network connectivity
+### Extend the User Model
+Edit `Server/src/models/userModel.ts` and update the Zod schemas in `Server/src/zod/usersZod.ts`.
 
-**Token Validation Failed**
-- Verify `AUTH0_AUDIENCE` matches in both client and server
-- Check token hasn't expired
-- Ensure Auth0 API is configured correctly
+## Troubleshooting
 
-## 📚 Learn More
+**Auth0 login redirect not working**
+- Check callback URLs in Auth0 dashboard match `http://localhost:5173`
+- Ensure `AUTH0_DOMAIN` doesn't have `https://` prefix
 
-### Documentation
-- [Auth0 Documentation](https://auth0.com/docs)
-- [React Documentation](https://react.dev)
-- [Express Documentation](https://expressjs.com)
-- [MongoDB Documentation](https://docs.mongodb.com)
-- [Tailwind CSS](https://tailwindcss.com/docs)
-- [Radix UI](https://www.radix-ui.com)
+**CORS errors**
+- Verify `CLIENT_URL` in `Server/.env` matches the frontend origin
+- In Docker, the Vite proxy handles `/api` routing — CORS should not be an issue
 
-### Design Resources
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
-- [Radix UI Components](https://www.radix-ui.com)
-- [Atomic Design Methodology](https://bradfrost.com/blog/post/atomic-web-design/)
+**Database connection failed**
+- Verify `MONGO_URI` in `Server/.env`
+- If using Docker, ensure MongoDB is accessible from the container network
 
-## 🤝 Contributing
+**Token validation failed**
+- `AUTH0_AUDIENCE` must match in both Server and Client `.env` files
+- Check that the Auth0 API is configured correctly in the dashboard
 
-This is a template repository. Feel free to:
-- Fork and modify for your projects
-- Report issues or bugs
-- Suggest improvements
-- Share your creations
+**Docker containers not starting**
+- Run `npm run docker:ps` to check status
+- Run `npm run docker:logs:server` or `npm run docker:logs:client` for service-specific logs
+- Try `npm run docker:rebuild` for a clean start
 
-## 📝 License
+## License
 
-ISC - Feel free to use this template for any purpose.
+ISC
 
-## 🎉 Credits
+## Contributing
 
-Built with ❤️ using:
-- React, Express, MongoDB, Node.js
-- Auth0 for authentication
-- Tailwind CSS for styling
-- And many other amazing open-source tools
-
----
-
-**Happy coding! 🚀**
-
-For questions or support, please open an issue on GitHub.
-
+Fork, modify, and use for your projects. Issues and suggestions welcome.
