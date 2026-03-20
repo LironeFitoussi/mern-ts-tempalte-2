@@ -161,6 +161,22 @@ Configured in `.claude/settings.json`. These run automatically during developmen
 - **Client test setup**: `Client/src/test/setup.ts` — imports `@testing-library/jest-dom/vitest`
 - **Test file pattern**: `src/**/*.test.ts` (Server), `src/**/*.test.{ts,tsx}` (Client)
 
+## Claude Code Agents
+
+Autonomous agents in `.claude/agents/` that handle multi-step workflows. Unlike commands (interactive, single-step), agents work autonomously across multiple tools and MCP servers.
+
+| Agent | File | Purpose | MCP Servers Used |
+|-------|------|---------|-----------------|
+| Backend Engineer | `backend-engineer.md` | Senior backend dev — implements, debugs, refactors server code following all project conventions | mongodb, context7, eslint |
+| Frontend Engineer | `frontend-engineer.md` | Senior frontend dev — implements, debugs, refactors client code following all project conventions | playwright, context7, eslint |
+| Feature Architect | `feature-architect.md` | Designs full-stack feature implementation plans without writing code | context7, mongodb, auth0 |
+| E2E Test Writer | `e2e-test-writer.md` | Creates and validates Playwright E2E tests against the running app | playwright |
+| PR Review | `pr-review.md` | Reviews GitHub PRs against project conventions, posts structured feedback | github, eslint |
+| Issue to Code | `issue-to-code.md` | Reads a GitHub issue → implements feature → opens PR | github, context7, eslint |
+| DB Migration | `db-migrate.md` | Compares Mongoose models vs live MongoDB, performs schema migrations | mongodb |
+| Auth0 Setup | `auth0-setup.md` | Configures Auth0 tenant (apps, APIs, roles, permissions) | auth0 |
+| API Health Audit | `api-health-audit.md` | Proactive audit of API, database, auth config, and docs consistency | mongodb, auth0 |
+
 ## Adding New Features
 
 ### New API endpoint
